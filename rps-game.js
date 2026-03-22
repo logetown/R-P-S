@@ -1,136 +1,123 @@
-let score = JSON.parse(localStorage.getItem('score')) || {
+let gameStats = JSON.parse(localStorage.getItem('gameStats')) || {
   wins: 0,
   losses: 0,
   ties: 0
 };
 
-updateScoreElement();
+refreshScoreDisplay();
 
-/*
-if (!score) {
-  score = {
-    wins: 0,
-    losses: 0,
-    ties: 0
-  };
-}
-*/
+let isAutoRunning = false;
+let timerId;
 
-let isAutoPlaying = false;
-let intervalId;
-
-//const autoPlay = () => {
-
-//};
-function autoPlay() {
-  if (!isAutoPlaying) {
-    intervalId = setInterval(() => {
-      const playerMove = pickComputerMove();
-      playGame(playerMove);
+function toggleAutoMode() {
+  if (!isAutoRunning) {
+    timerId = setInterval(() => {
+      const userMoveSelection = getComputerChoice();
+      processPlay(userMoveSelection);
     }, 1000);
-    isAutoPlaying = true;
+    isAutoRunning = true;
 
   } else {
-    clearInterval(intervalId);
-    isAutoPlaying = false;
+    clearInterval(timerId);
+    isAutoRunning = false;
   }
 }
 
-document.querySelector('.js-rock-button')
+document.querySelector('.js-rock-btn')
   .addEventListener('click', () => {
-    playGame('rock');
+    processPlay('rock');
   });
 
-document.querySelector('.js-paper-button')
+document.querySelector('.js-paper-btn')
   .addEventListener('click', () => {
-    playGame('paper');
+    processPlay('paper');
   });
 
-document.querySelector('.js-scissors-button')
+document.querySelector('.js-scissors-btn')
   .addEventListener('click', () => {
-    playGame('scissors');
+    processPlay('scissors');
   });
 
 document.body.addEventListener('keydown', (event) => {
   if (event.key === 'r') {
-    playGame('rock');
+    processPlay('rock');
   } else if (event.key === 'p') {
-    playGame('paper');
+    processPlay('paper');
   } else if (event.key === 's') {
-    playGame('scissors');
+    processPlay('scissors');
   }
 });
 
-function playGame(playerMove) {
-  const computerMove = pickComputerMove();
+function processPlay(userMove) {
+  const botMove = getComputerChoice();
 
-  let result = '';
+  let roundResult = '';
 
-  if (playerMove === 'scissors') {
-    if (computerMove === 'rock') {
-      result = 'You lose.';
-    } else if (computerMove === 'paper') {
-      result = 'You win.';
-    } else if (computerMove === 'scissors') {
-      result = 'Tie.';
+  if (userMove === 'scissors') {
+    if (botMove === 'rock') {
+      roundResult = 'You lose.';
+    } else if (botMove === 'paper') {
+      roundResult = 'You win.';
+    } else if (botMove === 'scissors') {
+      roundResult = 'Tie.';
     }
 
-  } else if (playerMove === 'paper') {
-    if (computerMove === 'rock') {
-      result = 'You win.';
-    } else if (computerMove === 'paper') {
-      result = 'Tie.';
-    } else if (computerMove === 'scissors') {
-      result = 'You lose.';
+  } else if (userMove === 'paper') {
+    if (botMove === 'rock') {
+      roundResult = 'You win.';
+    } else if (botMove === 'paper') {
+      roundResult = 'Tie.';
+    } else if (botMove === 'scissors') {
+      roundResult = 'You lose.';
     }
     
-  } else if (playerMove === 'rock') {
-    if (computerMove === 'rock') {
-      result = 'Tie.';
-    } else if (computerMove === 'paper') {
-      result = 'You lose.';
-    } else if (computerMove === 'scissors') {
-      result = 'You win.';
+  } else if (userMove === 'rock') {
+    if (botMove === 'rock') {
+      roundResult = 'Tie.';
+    } else if (botMove === 'paper') {
+      roundResult = 'You lose.';
+    } else if (botMove === 'scissors') {
+      roundResult = 'You win.';
     }
   }
 
-  if (result === 'You win.') {
-    score.wins += 1;
-  } else if (result === 'You lose.') {
-    score.losses += 1;
-  } else if (result === 'Tie.') {
-    score.ties += 1;
+  if (roundResult === 'You win.') {
+    gameStats.wins += 1;
+  } else if (roundResult === 'You lose.') {
+    gameStats.losses += 1;
+  } else if (roundResult === 'Tie.') {
+    gameStats.ties += 1;
   }
 
-  localStorage.setItem('score', JSON.stringify(score));
+  localStorage.setItem('gameStats', JSON.stringify(gameStats));
 
-  updateScoreElement();
+  refreshScoreDisplay();
 
-  document.querySelector('.js-result').innerHTML = result;
+  document.querySelector('.js-round-result').innerHTML = roundResult;
 
-  document.querySelector('.js-moves').innerHTML = `You
-<img src="images/${playerMove}-emoji.png" class="move-icon">
-<img src="images/${computerMove}-emoji.png" class="move-icon">
+  document.querySelector('.js-battle-moves').innerHTML = `You
+<img src="images/${userMove}-emoji.png" class="choice-image">
+<img src="images/${botMove}-emoji.png" class="choice-image">
 Computer`;
 }
 
-function updateScoreElement() {
-  document.querySelector('.js-score')
-    .innerHTML = `Wins: ${score.wins}, Losses: ${score.losses}, Ties: ${score.ties}`;
+function refreshScoreDisplay() {
+  document.querySelector('.js-stats-board')
+    .innerHTML = `Wins: ${gameStats.wins}, Losses: ${gameStats.losses}, Ties: ${gameStats.ties}`;
 }
 
-function pickComputerMove() {
-  const randomNumber = Math.random();
+function getComputerChoice() {
+  const randomValue = Math.random();
 
-  let computerMove = '';
+  let botChoice = '';
 
-  if (randomNumber >= 0 && randomNumber < 1 / 3) {
-    computerMove = 'rock';
-  } else if (randomNumber >= 1 / 3 && randomNumber < 2 / 3) {
-    computerMove = 'paper';
-  } else if (randomNumber >= 2 / 3 && randomNumber < 1) {
-    computerMove = 'scissors';
+  if (randomValue >= 0 && randomValue < 1 / 3) {
+    botChoice = 'rock';
+  } else if (randomValue >= 1 / 3 && randomValue < 2 / 3) {
+    botChoice = 'paper';
+  } else if (randomValue >= 2 / 3 && randomValue < 1) {
+    botChoice = 'scissors';
   }
 
-  return computerMove;
-}
+  return botChoice;
+}
